@@ -1,0 +1,23 @@
+#Require package are ggplot, dplyr
+setwd("name of working direcotry")
+data<-read.csv("filename.csv",head=T)
+library("dplyr")
+library("ggplot2")
+#making data compatable for plotting,  i.e. finind the mean and SE of the data set
+ploting_data<-group_by(data, predictor_x, predictor_y, predictor_z)%>%
+  summarise(mean_Variable1=mean(variable1), SE_var1=sd(variable1)/sqrt(n())) #make sure column is free of NA, or you can also use tapply function
+#what you will end up is with a data frame which will be grouped based on the given perdictor. 
+  
+#ploting the data. 
+dodge=position_dodge(width = 0.9) # to make sure your error bars and barplots have same dodge space
+p<-ggplot(ploting_data,aes(x=predictor_x,y=mean_variable1,fill=factor(predictor_y)))+
+  facet_grid(~predictor_z)+
+  geom_bar(stat = "identity",position = dodge,width = 0.9)
+limits<-aes(ymax=mean_variable1+SE_variable1,ymin=mean_variable1-SE_variable1)
+  p+geom_errorbar(limits,position = dodge,stat="identity",width=0.25)+
+  facet_grid(~predictor_z)+theme_classic()+ #theme is optional 
+  ylab("Mean variable measurment")+
+  xlab("predictor_x")
+  
+# Incase you need to define the color and lables and also X axis ticks you can use 
+#scale_fill_manual for fill option and scale_x_discrete for naming of x lables.
